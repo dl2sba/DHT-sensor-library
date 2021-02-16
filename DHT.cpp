@@ -109,11 +109,17 @@ float DHT::readTemperature(bool S, bool force) {
       break;
     case DHT22:
     case DHT21:
-      f = ((word)(data[2] & 0x7F)) << 8 | data[3];
-      f *= 0.1;
-      if (data[2] & 0x80) {
-        f *= -1;
-      }
+      int16_t d = ((int16_t)data[2]) << 8 | data[3];
+	    //	msb set == negativ
+	    if (d & 0x8000) {
+		    d &= 0x7fff;
+		    //	0x8000 == 0x0000 == 0)
+		    if ( d == 0 ) d = 0x7fff;
+		    d = 0x7fff - d;
+		    d *= -1;
+	    }
+	    f = d * 0.1f;
+
       if (S) {
         f = convertCtoF(f);
       }
